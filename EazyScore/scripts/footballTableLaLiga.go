@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 func main() {
 
 	url := "https://v3.football.api-sports.io/standings?league=140&season=2023"
 	method := "GET"
+
+	apiKey := os.Getenv("API_SPORT")
+	fmt.Println(apiKey)
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
@@ -18,7 +22,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	req.Header.Add("x-rapidapi-key", "092a94ed4c3b241a1b48f6df6c1d738a")
+	req.Header.Add("x-rapidapi-key", apiKey)
 	req.Header.Add("x-rapidapi-host", "v3.football.api-sports.io")
 
 	res, err := client.Do(req)
