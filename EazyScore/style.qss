@@ -1,0 +1,12 @@
+QPushButton {
+    border-image: url(:/resource/img/stadium.png);
+    width: 400px;
+    height: 200px;
+    border-radius: 16px;
+}
+
+#ESTableWidget{
+
+    background-image: url(:/resource/img/stadium.png);
+
+}

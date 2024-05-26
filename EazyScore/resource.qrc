@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/resource">
+    <file>style.qss</file>
+    <file>img/stadium.png</file>
+    <file>img/realMadridIcon.png</file>
+  </qresource>
+</RCC>
