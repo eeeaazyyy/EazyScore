@@ -1,3 +1,14 @@
+/**
+ * @file establewidget.h
+ * @brief Класс ESTableWidget предоставляет виджет для отображения и управления информацией о футбольной лиге.
+ *
+ * Этот класс позволяет отобразить турнирную таблицу, эмблему и название лиги, а также предоставляет инструменты для редактирования стиля и содержимого.
+ *
+ * @author Vladislav Trifonov https://github.com/milkivei7
+ * @date 26.05.2024
+ */
+
+
 #include "ESTableWidget.h"
 #include <QStandardItem>
 #include <QStandardItemModel>
@@ -6,9 +17,76 @@
 #include <QFrame>
 #include <QHeaderView>
 
-ESTableWidget::ESTableWidget(QWidget* parent) : QWidget(parent), listViewTable(nullptr)
+ESTableWidget::ESTableWidget(QWidget* parent) : QWidget(parent)
 {
-	//setMinimumSize(350, 230);
+	ESTW_TableView		= nullptr;
+	mainFrame			= nullptr;
+	widNameIconLeague	= nullptr;
+	layVertMain			= nullptr;
+	
+	setViewModeESTW();
+	fillForm();
+}
+
+ESTableWidget::~ESTableWidget()
+{
+
+}
+
+/**
+ * Функция widgetIconLeague() создает и настраивает виджет для отображения эмблемы и названия футбольной лиги.
+ */
+QWidget* ESTableWidget::widgetIconLeague()
+{
+	QWidget* widIconLeague = new QWidget(this);
+
+	widIconLeague->setMaximumHeight(50);
+	widIconLeague->setStyleSheet(
+		"QWidget{"
+		"margin: 0px;"
+		"background: transparent;"
+		"border-image: transparent;"
+		"padding: 0px;"
+		"} "
+	);
+
+	
+	QLabel* labelIconLeague = new QLabel(widIconLeague);
+	labelIconLeague->setMinimumSize(45, 45);
+	setLabelStyleIconLeague(labelIconLeague);
+
+
+	QLabel* labelNameLeague = new QLabel("Table", widIconLeague);
+	labelNameLeague->setMinimumSize(45, 45);
+	setLabelStyleNameLeague(labelNameLeague);
+
+	QHBoxLayout* LayWidIconLeag = new QHBoxLayout(widIconLeague);
+	LayWidIconLeag->setAlignment(Qt::AlignLeft);
+	
+	LayWidIconLeag->addWidget(labelNameLeague);
+	LayWidIconLeag->addWidget(labelIconLeague);
+
+	widIconLeague->setLayout(LayWidIconLeag);
+
+
+	return widIconLeague;
+}
+
+
+
+/*
+ * Функция setViewModeESTW() устанавливает специфические параметры для виджета ESTableWidget
+ *
+ * 1. Устанавливает максимальную высоту виджета на 232 пикселя.
+ * 2. Изменяет курсор мыши на "hand" при наведении на виджет, указывая на интерактивность.
+ * 3. Применяет стили QSS для настройки внешнего вида виджета:
+ *     - Удаляет внутренние отступы (margin и padding).
+ *     - При наведении мыши меняет фон виджета на полупрозрачный.
+ * 4. Устанавливает размер политику виджета таким образом, что минимальная ширина равна ширине содержимого,
+ *    а высота может расширяться вместе с содержимым.
+ */
+void ESTableWidget::setViewModeESTW()
+{
 	setMaximumHeight(232);
 	setCursor(Qt::PointingHandCursor);
 	setStyleSheet(
@@ -21,50 +99,18 @@ ESTableWidget::ESTableWidget(QWidget* parent) : QWidget(parent), listViewTable(n
 		"} "
 	);
 	setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-	initListViewModel();
-
-	QWidget* widIconLeague = new QWidget(this);
-	widIconLeague->setMaximumHeight(50);
-	
-	QHBoxLayout* LayWidIconLeag = new QHBoxLayout(widIconLeague);
-	LayWidIconLeag->setAlignment(Qt::AlignLeft);
-
-	QIcon rmIcon(":/resource/img/realMadridIcon.png");
-	QPixmap pxmLeague(rmIcon.pixmap(35, 35, QIcon::Mode::Normal, QIcon::State::On));
-
-	QLabel* labelTable = new QLabel(widIconLeague);
-	labelTable->setMinimumSize(45, 45);
-	QLabel* labelNameTable = new QLabel("TABLE", widIconLeague);
-	labelNameTable->setMinimumSize(45, 45);
+}
 
 
-	labelTable->setPixmap(pxmLeague);
-	labelTable->setAlignment(Qt::AlignVCenter);
 
-	widIconLeague->setStyleSheet(
-		"QWidget{"
-		"margin: 0px;"
-		"background: transparent;"
-		"border-image: transparent;"
-		"padding: 0px;"
-		"} "
-	);
+/**
+ * Функция setLabelStyleNameLeague(QLabel* labelNameLeague) применяет стили QSS к переданному QLabel,
+ * предназначенному для отображения названия футбольной лиги.
+ */
+void ESTableWidget::setLabelStyleNameLeague(QLabel* labelNameLeague)
+{
 
-	labelTable->setStyleSheet(
-		"QLabel{"
-		"padding: 1px;"
-		"border-image: transparent;"
-		"background: transparent;"
-		"max-width: 50px;"
-		"height: 45px;"
-		"font-size: 20pt;" 
-		"font-weight: bold;" 
-		"border: none;" 
-		"border-radius:10px;"
-		"} "
-	);
-	labelNameTable->setAlignment(Qt::AlignVCenter);
-	labelNameTable->setStyleSheet(
+	labelNameLeague->setStyleSheet(
 		"QLabel{"
 		"border-image: transparent;"
 		"background: transparent;"
@@ -76,55 +122,106 @@ ESTableWidget::ESTableWidget(QWidget* parent) : QWidget(parent), listViewTable(n
 		"border-radius:0px;"
 		"} "
 	);
-
-
-	LayWidIconLeag->addWidget(labelNameTable);
-	LayWidIconLeag->addWidget(labelTable);
-
-	widIconLeague->setLayout(LayWidIconLeag);
-	//labelTable->setPixmap(pxmLeague);
-	//labelTable->setMask(pxmLeague.mask());
-	
-
-	QFrame* frame = new QFrame(this);
-	
-	QGridLayout* mainLayout = new QGridLayout(frame);
-	mainLayout->setSpacing(0);
-	mainLayout->addWidget(widIconLeague, 0, 0);
-	mainLayout->addWidget(listViewTable, 1, 0);
-	
-	frame->setLayout(mainLayout);
-	frame->setStyleSheet(
-		"QFrame{"
-		"background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0.04 rgba(139,55,169,0), stop : 0.4 rgba(139,55,169,30), stop : 1 rgba(50,73,158,90));"
-		"} "
-		"QFrame::hover{background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0.04 rgba(139,55,169,0), stop : 0.4 rgba(139,55,169,10), stop : 1 rgba(50,73,158,60));}");
-	//frame->setStyleSheet("border-image: url(:/resource/img/stadium.png) 0 0 0 0 stretch stretch;");50,73,158
-	
-	QVBoxLayout* vbox = new QVBoxLayout(this);
-	vbox->addWidget(frame);
-
-	this->setLayout(vbox);
-
 }
 
-ESTableWidget::~ESTableWidget()
+
+
+
+
+/**
+ * Функция setLabelStyleIconLeague(QLabel* labelIconLeague) применяет стили QSS к переданному QLabel,
+ * предназначенному для отображения иконки чемпионата.
+ */
+void ESTableWidget::setLabelStyleIconLeague(QLabel* labelIconLeague)
 {
+	QIcon   rmIcon(":/resource/img/realMadridIcon.png");
+	QPixmap pxmLeague(
+		 rmIcon.pixmap(
+			35, 35, 
+			QIcon::Mode::Normal,
+			QIcon::State::On
+		)
+	);
 
+	labelIconLeague->setPixmap(pxmLeague);
+	labelIconLeague->setAlignment(Qt::AlignVCenter);
+
+	labelIconLeague->setStyleSheet(
+		"QLabel{"
+		"padding: 1px;"
+		"border-image: transparent;"
+		"background: transparent;"
+		"max-width: 50px;"
+		"height: 45px;"
+		"font-size: 20pt;"
+		"font-weight: bold;"
+		"border: none;"
+		"border-radius:10px;"
+		"} "
+	);
 }
 
+
+/**
+ * Функция fillForm() заполняет основной виджет ESTableWidget данными и настройками, необходимыми для отображения
+ * информации о футбольной лиге и ее турнирной таблицы.
+ */
+void ESTableWidget::fillForm()
+{
+	initListViewModel();
+	widNameIconLeague = widgetIconLeague();
+	fillFrame();
+	layVertMain = new QVBoxLayout(this);
+	layVertMain->addWidget(mainFrame);
+	this->setLayout(layVertMain);
+}
+
+void ESTableWidget::fillFrame()
+{
+	if (mainFrame != nullptr)
+		return;
+
+	mainFrame = new QFrame(this);
+
+
+	QGridLayout* mainLayout = new QGridLayout(mainFrame);
+	mainLayout->setSpacing(0);
+	mainLayout->addWidget(widNameIconLeague, 0, 0);
+	mainLayout->addWidget(ESTW_TableView, 1, 0);
+
+	mainFrame->setLayout(mainLayout);
+	mainFrame->setStyleSheet(
+		"QFrame{"
+		"background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0.04 rgba(139,55,169,0),"
+		"stop : 0.4 rgba(139,55,169,30), stop : 1 rgba(50,73,158,90));"
+		"} "
+
+		"QFrame::hover{"
+		"background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0.04 rgba(139,55,169,0),"
+		"stop : 0.4 rgba(139,55,169,10), stop : 1 rgba(50,73,158,60));"
+		"} "
+	);
+	/*QVBoxLayout* vbox = new QVBoxLayout(this);
+	vbox->addWidget(mainFrame);*/
+}
+
+
+/**
+ * Функция initListViewModel(void) инициализирует и настраивает модель представления для QTableView, используемой в ESTableWidget,
+ * предназначенную для отображения данных о футбольных командах и их статистике.
+ */
 void ESTableWidget::initListViewModel(void)
 {
-	if (listViewTable != nullptr)
+	if (ESTW_TableView != nullptr)
 		return;
-	listViewTable = new QTableView(this);
-	listViewTable->setMinimumHeight(250);
-	listViewTable->setAttribute(Qt::WA_TransparentForMouseEvents);
-	listViewTable->setIconSize(QSize(28, 28));
-	listViewTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-	listViewTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-	listViewTable->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
-	listViewTable->setStyleSheet(
+	ESTW_TableView = new QTableView(this);
+	ESTW_TableView->setMinimumHeight(250);
+	ESTW_TableView->setAttribute(Qt::WA_TransparentForMouseEvents);
+	ESTW_TableView->setIconSize(QSize(28, 28));
+	ESTW_TableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ESTW_TableView->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+	ESTW_TableView->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
+	ESTW_TableView->setStyleSheet(
 		"QHeaderView {"
 		"background-color: transparent;"
 		"background: transparent;"
@@ -168,7 +265,7 @@ void ESTableWidget::initListViewModel(void)
 	
 	
 
-	QStandardItemModel* modelList = new QStandardItemModel(listViewTable);
+	QStandardItemModel* modelList = new QStandardItemModel(ESTW_TableView);
 	modelList->setHorizontalHeaderLabels({ "TEAM", "W", "D", "L"});
 
 
@@ -192,11 +289,11 @@ void ESTableWidget::initListViewModel(void)
 	
 	//listViewTable->setColumnWidth(1, 200);
 
-	listViewTable->setModel(modelList);
-	listViewTable->verticalHeader()->setVisible(false);
+	ESTW_TableView->setModel(modelList);
+	ESTW_TableView->verticalHeader()->setVisible(false);
 	
-	listViewTable->verticalHeader()->setMinimumSectionSize(40);
+	ESTW_TableView->verticalHeader()->setMinimumSectionSize(40);
 	//listViewTable->setRowHeight(0, 100); // Устанавливает высоту первой строки равной 40 пикселей
-	listViewTable->resizeColumnsToContents();
+	ESTW_TableView->resizeColumnsToContents();
 	
 }
