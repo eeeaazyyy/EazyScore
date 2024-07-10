@@ -20,9 +20,9 @@
 ESTableWidget::ESTableWidget(QWidget* parent) : QWidget(parent)
 {
 	ESTW_TableView		= nullptr;
-	mainFrame		= nullptr;
+	mainFrame			= nullptr;
 	widNameIconLeague	= nullptr;
-	layVertMain		= nullptr;
+	layVertMain			= nullptr;
 	
 	setViewModeESTW();
 	fillForm();
